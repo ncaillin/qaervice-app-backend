@@ -14,7 +14,7 @@ pipeline {
     }
     stage('Login') {
       steps {
-        sh 'echo login'
+        sh 'echo login2'
       }
     }
     stage('Push') {
