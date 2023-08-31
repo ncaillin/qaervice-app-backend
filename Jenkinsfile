@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'docker build . -t qaervice-backend'
+        app = docker.build("qaervice/qaervice-backend")
       }
     }
     stage('Login') {
