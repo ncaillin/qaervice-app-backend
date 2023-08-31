@@ -1,4 +1,4 @@
-node {
+pipeline {
   agent any
   def app
   options {
@@ -9,9 +9,7 @@ node {
   }
   stages {
     stage('Build') {
-      steps {
-        app = docker.build("qaervice/qaervice-backend")
-      }
+      app = docker.build("qaervice/qaervice-backend")
     }
     stage('Login') {
       steps {
