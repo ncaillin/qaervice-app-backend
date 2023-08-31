@@ -1,4 +1,4 @@
-pipeline {
+node {
   agent any
   def app
   options {
