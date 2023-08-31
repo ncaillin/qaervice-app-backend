@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'echo building'
+        sh 'docker build . -t qaervice-backend'
       }
     }
     stage('Login') {
