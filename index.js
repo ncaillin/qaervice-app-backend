@@ -3,6 +3,7 @@ const cookieParser = require('cookie-parser');
 const sessions = require('express-session');
 const pg = require('pg');
 const bcrypt = require('bcrypt');
+const nodemailer = require("nodemailer");
 require('dotenv').config();
 
 const client = new pg.Client({
@@ -10,8 +11,28 @@ const client = new pg.Client({
   password: process.env.PG_PASS,
   host: process.env.PG_HOST,
   port: process.env.PG_PORT,
-  database: 'qaervice-dev-db',
+  database: 'dev',
 });
+
+const noreply_transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: true,
+  auth: {
+    user: process.env.NOREPLY_EMAIL_USER,
+    pass: process.env.NOREPLY_EMAIL_PASS
+  }
+})
+const caillin_transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: true,
+  auth: {
+    user: process.env.CAILLIN_EMAIL_USER,
+    pass: process.env.CAILLIN_EMAIL_PASS
+  }
+})
+
 
 
 const app = express();
@@ -43,7 +64,194 @@ app.post('/api/v1/login', async (req, res) => {
 
 })
 
-app.post('/api/v1/register', async (req, res) => {
+const sendMail = async () => {
+  const info = await noreply_transporter.sendMail({
+    from: '"noreply" <noreply@qaervice.com>',
+    to: 'nugentcaillin@gmail.com',
+    subject: 'embedded html test 2',
+    html: `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+  <style type="text/css">
+  .brand {
+    color: blueviolet;
+    font-size: 2em;
+  }
+  .heading {
+    font-size: 3em;
+    margin: auto;
+    text-align: center;
+  }
+  .text {
+    font-size: 1.4em;
+  }
+  .subHeading {
+    font-size: 2em;
+    margin: auto;
+    text-align: center;
+  }
+  .jobTitle {
+    font-size: 1em;
+    color: blueviolet;
+  }
+  .unsubscribe {
+    width: 70vw;
+    margin: 0 auto;
+    background-color: blueviolet;
+    color: white;
+    border: none;
+    font-size: 1.8em;
+    height: 2em;
+  }
+  </style>
+  </head>
+  <body>
+    <h2 class="brand">qaervice</h2>
+    <h1 class="heading">Thanks for Joining!</h1>
+    <p class="text">Welcome, name. I'm so excited to have you here!<br>More information will arrive in the coming weeks.</p>
+    <h3 class="subHeading">How do I get my discount?</h3>
+    <p class="text">You'll recieve an email close to the release date containing a discount code. Apply this when registering to get a 15% lifetime discount.<br><br>This will apply even if you choose to select the free plan.</p>
+    <h3 class="subHeading">Have any other questions?</h3>
+    <p class="text">Don't hesitate to reach out! <br><br> Feel free to reply to this email and I'll get back to you as soon as I can <br><br>Warm regards,<br>Caillin Nugent</p>
+    <p class="jobTitle">full stack developer | caillin@qaervice.com<br><br><br></p>
+    <a href="google.com"><button class="unsubscribe">Unsubscribe</button></a>
+  </body>
+</html>`,
+  })
+  console.log(info)
+}
+
+
+
+app.get('/v1/email', async (req, res) => {
+  try {
+    await sendMail()
+    res.status(200).end()
+    
+
+
+  }
+  catch (err) {
+    res.status(500).send({"error": err})
+  }
+})
+
+app.post('/v1/validate', async (req, res) => {
+
+  try {
+    const email = req.body.email.toLowerCase();
+    const name = req.body.name;
+
+    if (!email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+      res.status(400).send({"error": "Invalid email"});
+      return;
+    }
+    if (!name) {
+      res.status(400).send({"error": "Please enter a name"})
+    }
+
+    let query = 'SELECT "email" FROM public."Validation" WHERE "email" = $1'
+    let values = [email];
+    let DB_res = await client.query(query, values)
+    if (DB_res.rowCount !== 0) {
+      res.status(409).send({"error": "User Exists with that email"})
+      return;
+    }
+    let unsubscribe_hash = await bcrypt.hash(email, 10);
+    query = 'INSERT INTO public."Validation"("email", "name", "subscribed", "unsubscribe_hash") VALUES($1, $2, $3, $4) RETURNING *'
+    values = [email, name, true, unsubscribe_hash]
+    DB_res = await client.query(query, values);
+    if (!DB_res.rows) {
+      res.status(500).send({"error": "Unexpected error, Please try again."})
+      return;
+    }
+const welcome_template = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+  <style type="text/css">
+  .brand {
+    color: blueviolet;
+    font-size: 2em;
+  }
+  .heading {
+    font-size: 3em;
+    margin: auto;
+    text-align: center;
+  }
+  .text {
+    font-size: 1.4em;
+  }
+  .subHeading {
+    font-size: 2em;
+    margin: auto;
+    text-align: center;
+  }
+  .jobTitle {
+    font-size: 1em;
+    color: blueviolet;
+  }
+  .unsubscribe {
+    width: 70vw;
+    margin: 0 auto;
+    background-color: blueviolet;
+    color: white;
+    border: none;
+    font-size: 1.8em;
+    height: 2em;
+  }
+  </style>
+  </head>
+  <body>
+    <h2 class="brand">qaervice</h2>
+    <h1 class="heading">Thanks for Joining!</h1>
+    <p class="text">Welcome, ${name}. I'm so excited to have you here!<br>More information will arrive in the coming weeks.</p>
+    <h3 class="subHeading">How do I get my discount?</h3>
+    <p class="text">You'll recieve an email close to the release date containing a discount code. Apply this when registering to get a 15% lifetime discount.<br><br>This will apply even if you choose to select the free plan.</p>
+    <h3 class="subHeading">Have any other questions?</h3>
+    <p class="text">Don't hesitate to reach out! <br><br> Feel free to reply to this email and I'll get back to you as soon as I can <br><br>Warm regards,<br>Caillin Nugent</p>
+    <p class="jobTitle">full stack developer | caillin@qaervice.com<br><br><br></p>
+    <a href="qaervice.com/unsubscribe.html?hash=${unsubscribe_hash}"><button class="unsubscribe">Unsubscribe</button></a>
+  </body>
+</html>`
+    res.status(201).end();
+
+    caillin_transporter.sendMail({
+    from: '"Caillin" <caillin@qaervice.com>',
+    to: email,
+    subject: 'Welcome to Qaervice!',
+    html: welcome_template
+    }).then(info => {
+      console.log(info);
+    })
+  
+  } catch (err) {
+    res.status(500).end();
+  }
+})
+
+app.post('/v1/unsubscribe', async (req, res) => {
+  try {
+    const hash = req.body.hash;
+    let query = 'SELECT * FROM public."Validation" WHERE "unsubscribe_hash" = $1'
+    let values = [hash];
+    let DB_res = await client.query(query, values)
+
+    query = 'DELETE FROM public."Validation" WHERE user_id = $1';
+    values = [DB_res.rows[0].user_id];
+    await client.query(query, values);
+    console.log(`${DB_res.rows[0].name} unsubscribed`)
+
+    res.status(200).end();
+  } catch (err) {
+    console.log(err)
+    res.status(500).end();
+  }
+
+})
+
+app.post('/v1/register', async (req, res) => {
   try {
     
     const user = req.body.email.toLowerCase();
@@ -93,7 +301,27 @@ app.post('/api/v1/register', async (req, res) => {
 })
 
 
-app.listen(PORT, () => {
-  console.log(`QAervice app backend listening on port ${PORT}`)
-  client.connect().then(console.log('Connected to Postgres DB'))
+app.listen(PORT, async () => {
+  console.log(`QAervice app backend listening on port ${PORT}`);
+  await client.connect();
+  console.log('Checking Posgres connection...');
+  let res = await client.query('SELECT NOW()');
+  if  (!res) {
+    return;
+  };
+  console.log('postgres OK');
+  console.log('Checking noreply nodemailer connection...')
+  let email_waiting = await noreply_transporter.verify();
+  if (!email_waiting) {
+    console.error('Connection error, exiting..')
+    return;
+  }
+  console.log('noreply nodemailer OK');
+  console.log('Checking caillin nodemailer connection...')
+  email_waiting = await noreply_transporter.verify();
+  if (!email_waiting) {
+    console.error('Connection error, exiting..')
+    return;
+  }
+  console.log('caillin nodemailer OK');
 })
