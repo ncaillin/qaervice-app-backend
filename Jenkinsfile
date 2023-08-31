@@ -1,5 +1,6 @@
 pipeline {
   agent any
+  def app
   options {
   buildDiscarder(logRotator(numToKeepStr: '5'))
   }
