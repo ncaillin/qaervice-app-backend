@@ -302,7 +302,7 @@ app.post('/v1/register', async (req, res) => {
 
 
 app.listen(PORT, async () => {
-  console.log(`QAervice app backend listening on port ${PORT}`);
+  console.log(`qaervice app backend listening on port ${PORT}`);
   await client.connect();
   console.log('Checking Posgres connection...');
   let res = await client.query('SELECT NOW()');
