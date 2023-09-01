@@ -4,6 +4,7 @@ const sessions = require('express-session');
 const pg = require('pg');
 const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
+const cors = require('cors');
 require('dotenv').config();
 
 const client = new pg.Client({
@@ -36,6 +37,7 @@ const caillin_transporter = nodemailer.createTransport({
 
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 const PORT = 3001;
 
