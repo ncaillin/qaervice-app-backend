@@ -142,7 +142,7 @@ app.get('/v1/email', async (req, res) => {
 app.post('/v1/validate', async (req, res) => {
 
   try {
-    const email = req.body.email.toLowerCase().strip();
+    const email = req.body.email.toLowerCase().trim();
     const name = req.body.name;
 
     if (!email.match(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
