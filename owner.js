@@ -12,7 +12,7 @@ const
 } = process.env
 
 
-router.get('/register', async (req, res) => // TODO: HOME REDIRECT 
+router.post('/register', async (req, res) => // TODO: HOME REDIRECT 
 {
 
   const EMAIL_REG_EXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -31,6 +31,7 @@ router.get('/register', async (req, res) => // TODO: HOME REDIRECT
   }
   
   email = email.toLowerCase()
+  email = email.trim()
 
   if (!email.match(EMAIL_REG_EXP))
   {

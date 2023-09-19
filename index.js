@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
 const cors = require('cors');
 const owner = require('./owner');
+const misc = require('./misc');
 const client = require('./db');
 require('dotenv').config();
 
@@ -54,6 +55,8 @@ app.use(session({
 app.use(express.json());
 
 app.use('/owner', owner)
+app.use('/misc', misc)
+
 
 const PORT = 3001;
 

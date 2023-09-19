@@ -37,10 +37,27 @@ name, email, password
 
 400 | 409 | 500 | 201 |
 --- | --- | --- | --- |
-email, password or name missing | email found in DB | error in DB write | new user created
+email, password or name missing | email found in DB |  in DB write | new user created
 email invalid |   |     |    |
 password less than 7 characters |   |    |     |
 
+### /v2/misc/login
+
+#### login for both employees and owners, adds id and type of user to session cookie
+
+##### inputs
+- name, email
+
+##### method
+
+- Checks email and password present in request
+- strips whitespace and makes email lowercase
+- Checks user Exists in DB under Employee or Owner table
+- if exists, assign id and type of user into session cookie
 
 
+##### return codes
 
+400 | 404 | 401 | 500 | 200 |
+--- | --- | --- | --- | ---
+Email or password missing | User not found | incorrect password |  More than 1 user found in DB | Login successful
