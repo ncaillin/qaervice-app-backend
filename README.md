@@ -19,6 +19,7 @@ int|text    |text           |int        |text           |bool       |int        
 
 ## Backend routes:
 
+### POST
 ### /v2/owner/register
 #### register a new owner user.
 ##### inputs
@@ -42,6 +43,7 @@ email, password or name missing | email found in DB |  in DB write | new user cr
 email invalid |   |     |    |
 password less than 7 characters |   |    |     |
 
+### POST
 ### /v2/misc/login
 
 #### login for both employees and owners, adds id and type of user to session cookie
@@ -63,6 +65,7 @@ password less than 7 characters |   |    |     |
 --- | --- | --- | --- | ---
 Email or password missing | User not found | incorrect password |  More than 1 user found in DB | Login successful
 
+### POST
 ### /v2/employee/create
 
 #### send an email for the employee to register their account
@@ -86,4 +89,35 @@ Email or password missing | User not found | incorrect password |  More than 1 u
 ----        |---                    | ---                               |---                    |
 Email sent  |Name, or email missing | Session missing or not correct    |User exists with email |
 &#xfeff;    |invalid email          |                                   |                       |
+
+### PUT
+### /v2/employee/setPassword
+
+#### set the password for a new employee
+
+##### inputs:
+- identifierStr
+- password
+##### requirements
+- password is at least 7 characters
+- employee has active=false
+##### method
+
+- check inputs present
+- check password valid
+- verifies employee present in DB
+- verifies active = false
+- creates password hash
+- modifies employee in DB to have passwordHash and active=true
+
+##### response codes
+
+200             |400                                |401                        |404                        |500
+---             |---                                |---                        |---                        |---
+Password set    |identifierStr or password missing  |active !== false           |Employee not found in DB   |error writing to DB
+&#xfeff;        |password < 7 chars                 |                           |                           |more than 1 employee found
+
+
+
+
 

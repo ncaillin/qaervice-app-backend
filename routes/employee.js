@@ -4,6 +4,7 @@ const redirect = require('../utils/redirects')
 const client = require('../utils/db')
 const mailer = require('../utils/mailer')
 const crypto = require('crypto')
+const bcrypt = require('bcrypt')
 
 const EMAIL_REG_EXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
@@ -80,6 +81,53 @@ router.post('/create', redirect.redirectOwner, async (req, res) =>
   })
 
   res.status(201).end()
+})
+
+router.put('/setPassword', async (req, res) => 
+{
+  const
+  {
+    identifierStr,
+    password
+  } = req.body
+
+  if (!(identifierStr && password))
+  {
+    return res.status(400).send({'error': 'requires password and identifierStr'})
+  }
+  if (!(password.length >= 7))
+  {
+    return res.status(400).send({'error': 'requires password length >= 7 chars'})
+  }
+  let query = 'SELECT * from public."Employee" WHERE "identifierStr" = $1'
+  let values = [identifierStr]
+  let DB_RES = await client.query(query, values)
+
+  if (DB_RES.rowCount === 0)
+  {
+    return res.status(404).send({'error': 'Employee not found'})
+  }
+  if (DB_RES.rowCount !== 1)
+  {
+    return res.status(500).send({'error': 'More than 1 employee found'})
+  }
+  const employee = DB_RES.rows[0]
+  if (employee.active !== false)
+  {
+    return res.status(401).send({'error': 'Password already set for this employee'})
+  }
+  const passwordHash = await bcrypt.hash(password, 10)
+  query = 'UPDATE public."Employee" SET "passwordHash" = $1, active = $2 WHERE id = $3 returning *'
+  values = [passwordHash, true, employee.id]
+
+  DB_RES = await client.query(query, values)
+  if (DB_RES.rowCount !== 1)
+  {
+    return res.status(500).end()
+  }
+
+  
+  return res.status(200).end()
 })
 
 module.exports = router
