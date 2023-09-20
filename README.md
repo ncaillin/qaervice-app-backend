@@ -85,5 +85,5 @@ Email or password missing | User not found | incorrect password |  More than 1 u
 201         | 400                   | 401                               |409                    |
 ----        |---                    | ---                               |---                    |
 Email sent  |Name, or email missing | Session missing or not correct    |User exists with email |
-            |invalid email          |                                   |                       |
+|invalid email          |                                   |                       |
 
