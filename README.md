@@ -6,14 +6,15 @@ The backend for the qaervice app
 
 ### Owner Table
 
-id      | email | name | membership | stripeId | passwordHash
--------- | ----- | ---- | --------- | --------|  -----------
-int      | text  | text | text      | text    | text 
+id          | email | name | membership | stripeId  | passwordHash  |
+--------    | ----- | ---- | ---------  | --------  |  -----------  |
+int         | text  | text | text       | text      | text          |
 
 ### Employee Table
 
-id | email | passwordHash | ownerId | identifierStr | active | photoId | name 
----|---|---|---|---|---|---|---|
+id | email  | passwordHash  | ownerId   | identifierStr | active    | photoId   | name  | 
+---|---     |---            |---        |---            |---        |---        |---    |
+int|text    |text           |int        |text           |bool       |int        |text   |
 
 
 ## Backend routes:
@@ -71,7 +72,13 @@ Email or password missing | User not found | incorrect password |  More than 1 u
 ##### requirements
 - session token with type: Owner
 ##### method
-- verify name, email present
+- verify name, email present and valid
+- verify session
+- verify email not present in Employee or Owner table
+- create identifierStr, ownerId + 40 random chars
+- initialise user to DB with name, email, identifierStr, ownerId, active=false
+- send registration email so employee can set password
+
 
 
 ##### response codes
@@ -79,3 +86,4 @@ Email or password missing | User not found | incorrect password |  More than 1 u
 ----        |---                    | ---                               |---                    |
 Email sent  |Name, or email missing | Session missing or not correct    |User exists with email |
             |invalid email          |                                   |                       |
+
