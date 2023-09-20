@@ -1,11 +1,13 @@
 const express = require('express');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
-const nodemailer = require("nodemailer");
 const cors = require('cors');
-const owner = require('./owner');
-const misc = require('./misc');
-const client = require('./db');
+const owner = require('./routes/owner');
+const misc = require('./routes/misc');
+const employee = require('./routes/employee');
+const client = require('./utils/db');
+const pg = require('pg');
+const pgSession = require('connect-pg-simple')(session);
 require('dotenv').config();
 
 const TWO_HOURS = 1000 * 60 * 60 * 2
@@ -15,34 +17,34 @@ const {
   NODE_ENV = 'development',
   SESS_NAME = 'sid',
   SESS_SECRET = '123456',
+  SESS_TABLE_NAME = 'devSessions'
 } = process.env
 
 const IN_PROD = NODE_ENV === 'production'
 
 
-const noreply_transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: true,
-  auth: {
-    user: process.env.NOREPLY_EMAIL_USER,
-    pass: process.env.NOREPLY_EMAIL_PASS
-  }
-})
-const caillin_transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: true,
-  auth: {
-    user: process.env.CAILLIN_EMAIL_USER,
-    pass: process.env.CAILLIN_EMAIL_PASS
-  }
+const app = express();
+
+const pool = new pg.Pool({
+  host: process.env.PG_HOST,
+  user: process.env.PG_USER,
+  password: process.env.PG_PASS,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 })
 
-const app = express();
+
+
+
 app.use(cors());
 app.use(session({
   name: SESS_NAME,
+  store: new pgSession({
+    pool: pool,
+    tableName: SESS_TABLE_NAME,
+    createTableIfMissing: true
+  }),
   resave: false,
   secret: SESS_SECRET,
   saveUninitialized: false,
@@ -56,6 +58,7 @@ app.use(express.json());
 
 app.use('/owner', owner)
 app.use('/misc', misc)
+app.use('/employee', employee)
 
 
 const PORT = 3001;
@@ -71,18 +74,4 @@ app.listen(PORT, async () => {
     return;
   };
   console.log('postgres OK');
-  console.log('Checking noreply nodemailer connection...')
-  let email_waiting = await noreply_transporter.verify();
-  if (!email_waiting) {
-    console.error('Connection error, exiting..')
-    return;
-  }
-  console.log('noreply nodemailer OK');
-  console.log('Checking caillin nodemailer connection...')
-  email_waiting = await noreply_transporter.verify();
-  if (!email_waiting) {
-    console.error('Connection error, exiting..')
-    return;
-  }
-  console.log('caillin nodemailer OK');
 })

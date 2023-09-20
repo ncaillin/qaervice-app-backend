@@ -1,7 +1,7 @@
 const express = require('express')
-const client = require('./db')
+const client = require('../utils/db')
 const router = express.Router()
-const stripe = require('./stripe')
+const stripe = require('../utils/stripe')
 const bcrypt = require('bcrypt')
 require('dotenv').config()
 

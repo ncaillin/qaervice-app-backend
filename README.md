@@ -53,7 +53,7 @@ password less than 7 characters |   |    |     |
 - Checks email and password present in request
 - strips whitespace and makes email lowercase
 - Checks user Exists in DB under Employee or Owner table
-- if exists, assign id and type of user into session cookie
+- if exists, assign uid and type of user into session cookie
 
 
 ##### return codes
@@ -61,3 +61,21 @@ password less than 7 characters |   |    |     |
 400 | 404 | 401 | 500 | 200 |
 --- | --- | --- | --- | ---
 Email or password missing | User not found | incorrect password |  More than 1 user found in DB | Login successful
+
+### /v2/employee/create
+
+#### send an email for the employee to register their account
+##### input
+- name
+- email
+##### requirements
+- session token with type: Owner
+##### method
+- verify name, email present
+
+
+##### response codes
+201         | 400                   | 401                               |409                    |
+----        |---                    | ---                               |---                    |
+Email sent  |Name, or email missing | Session missing or not correct    |User exists with email |
+            |invalid email          |                                   |                       |

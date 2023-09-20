@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcrypt')
-const client = require('./db')
+const client = require('../utils/db')
 
 router.post('/login', async (req, res) => 
 {
@@ -34,7 +34,7 @@ router.post('/login', async (req, res) =>
   {
     if (await bcrypt.compare(password, DB_RES.rows[0].passwordHash))
     {
-      req.session.id = DB_RES.rows[0].id
+      req.session.uid = DB_RES.rows[0].id
       req.session.type = 'Owner'
       return res.status(200).end()
     }
@@ -54,7 +54,7 @@ router.post('/login', async (req, res) =>
   {
     if (await bcrypt.compare(password, DB_RES.rows[0].passwordHash))
     {
-      req.session.id = DB_RES.rows[0].id
+      req.session.uid = DB_RES.rows[0].id
       req.session.type = 'User'
       return res.status(200).end()
     }
