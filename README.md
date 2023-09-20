@@ -16,6 +16,18 @@ id | email  | passwordHash  | ownerId   | identifierStr | active    | photoId   
 ---|---     |---            |---        |---            |---        |---        |---    |
 int|text    |text           |int        |text           |bool       |int        |text   |
 
+### Job Table
+
+id  |customerId |employeeId | ownerId   |name   |numTasks   |inProgress |rating
+--- |---        |---        |---        |---    |---        |---        |---
+int |int        |int        |int        |text   |int        |bool       |decimal(3,1)
+
+### Customer Table
+
+id  |ownerId    |name   |email  |
+--- |---        |---    |---    |
+int |int        |text   |text   |
+
 
 ## Backend routes:
 
@@ -83,7 +95,6 @@ Email or password missing | User not found | incorrect password |  More than 1 u
 - send registration email so employee can set password
 
 
-
 ##### response codes
 201         | 400                   | 401                               |409                    |
 ----        |---                    | ---                               |---                    |
@@ -118,6 +129,32 @@ Password set    |identifierStr or password missing  |active !== false           
 &#xfeff;        |password < 7 chars                 |                           |                           |more than 1 employee found
 
 
+### POST
+### /v2/customer/create
+
+##### inputs
+
+- name
+- email
+
+##### requirements
+
+- session with type Owner
+
+##### method
+
+- check session validity
+- check name, email present
+- check email valid
+- check customer does not exist
+- write customer to DB with ownerId, name, email
+
+##### response code
+
+400                     |401                |500                    |409                |201
+---                     |---                |---                    |---                |---
+name or email missing   |session invalid    |error writing to DB    |customer exists    |Customer created
+email invalid           |                   |                       |                   |
 
 
 
