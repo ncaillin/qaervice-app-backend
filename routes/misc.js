@@ -36,7 +36,7 @@ router.post('/login', async (req, res) =>
     {
       req.session.uid = DB_RES.rows[0].id
       req.session.type = 'Owner'
-      return res.status(200).end()
+      return res.status(200).send({'type': 'Owner'})
     }
     return res.status(401).send({'error': 'invalid password'})
   }
@@ -47,7 +47,7 @@ router.post('/login', async (req, res) =>
   
   if (DB_RES.rowCount > 1)
   {
-    return res.status(500).end()
+    return res.status(500).send({'error': 'more than one user found'})
   }
 
   if (DB_RES.rowCount === 1)
@@ -55,14 +55,14 @@ router.post('/login', async (req, res) =>
     if (await bcrypt.compare(password, DB_RES.rows[0].passwordHash))
     {
       req.session.uid = DB_RES.rows[0].id
-      req.session.type = 'User'
-      return res.status(200).end()
+      req.session.type = 'Employee'
+      return res.status(200).send({'type': 'Employee'})
     }
     return res.status(401).send({'error': 'invalid password'})
   }
 
 
-  res.status(404).end()
+  res.status(404).send({'error': 'no user found'})
 })
 
 module.exports = router

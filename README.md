@@ -18,7 +18,7 @@ int|text    |text           |int        |text           |bool       |int        
 
 ### Job Table
 
-id  |customerId |employeeId | ownerId   |name   |numTasks   |inProgress |rating
+id  |customerId |employeeId | ownerId   |name   |numTasks   |inProgress |rating | startTime | finishTime
 --- |---        |---        |---        |---    |---        |---        |---
 int |int        |int        |int        |text   |int        |bool       |decimal(3,1)
 
@@ -27,6 +27,8 @@ int |int        |int        |int        |text   |int        |bool       |decimal
 id  |ownerId    |name   |email  |
 --- |---        |---    |---    |
 int |int        |text   |text   |
+
+
 
 
 ## Backend routes:
@@ -69,6 +71,7 @@ password less than 7 characters |   |    |     |
 - strips whitespace and makes email lowercase
 - Checks user Exists in DB under Employee or Owner table
 - if exists, assign uid and type of user into session cookie
+- respond with type of user
 
 
 ##### return codes
@@ -129,7 +132,7 @@ Password set    |identifierStr or password missing  |active !== false           
 &#xfeff;        |password < 7 chars                 |                           |                           |more than 1 employee found
 
 
-### POST
+### OST
 ### /v2/customer/create
 
 ##### inputs
@@ -156,5 +159,20 @@ Password set    |identifierStr or password missing  |active !== false           
 name or email missing   |session invalid    |error writing to DB    |customer exists    |Customer created
 email invalid           |                   |                       |                   |
 
+### POST
+### /v2/job/create
+##### inputs
+- customerID
+- name
+##### requirements
+- session with type Employee
+##### method
+- check session validity
+- check jobName present and customerId present
+- check customer and employee valid
+- check customer has same ownerId as employee
+- initialise new Job with customerId, employeeId, ownerID, name, numTasks = 0, inProgress = true
+##### response code
 
-
+### PUT
+### /v2/task/add

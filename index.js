@@ -6,6 +6,7 @@ const owner = require('./routes/owner');
 const misc = require('./routes/misc');
 const employee = require('./routes/employee');
 const customer = require('./routes/customer');
+const job = require('./routes/job')
 const client = require('./utils/db');
 const pg = require('pg');
 const pgSession = require('connect-pg-simple')(session);
@@ -18,7 +19,8 @@ const {
   NODE_ENV = 'development',
   SESS_NAME = 'sid',
   SESS_SECRET = '123456',
-  SESS_TABLE_NAME = 'devSessions'
+  SESS_TABLE_NAME = 'devSessions',
+  CORS_ORIGIN = 'http://localhost:3000'
 } = process.env
 
 const IN_PROD = NODE_ENV === 'production'
@@ -38,7 +40,7 @@ const pool = new pg.Pool({
 
 
 
-app.use(cors());
+app.use(cors({origin: CORS_ORIGIN, credentials: true}));
 app.use(session({
   name: SESS_NAME,
   store: new pgSession({
@@ -61,6 +63,7 @@ app.use('/owner', owner)
 app.use('/misc', misc)
 app.use('/employee', employee)
 app.use('/customer', customer)
+app.use('/job', job)
 
 
 const PORT = 3001;
