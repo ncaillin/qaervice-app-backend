@@ -28,7 +28,15 @@ id  |ownerId    |name   |email  |
 --- |---        |---    |---    |
 int |int        |text   |text   |
 
+### Task Table
+id  | jobId |name   |startTime  |finishTime |photoId
+--- |---    |---    |---        |---        |---
+int | int   |text   |timestamp  |timestampt |int
 
+### Photo table
+id  |employeeId |
+--- |---        |
+int |int        |
 
 
 ## Backend routes:
@@ -174,5 +182,24 @@ email invalid           |                   |                       |           
 - initialise new Job with customerId, employeeId, ownerID, name, numTasks = 0, inProgress = true
 ##### response code
 
-### PUT
-### /v2/task/add
+### POST
+### /v2/photo/new
+##### inputs
+- Content-Type: application/octet stream
+##### requirements
+- session of type employee
+##### method
+- check session validity
+- check employee exists
+- check photo attached to request
+- write photo to DB 
+- return photo ID
+##### response code
+
+
+### GET
+### /v2/photos
+##### inputs
+- photoID
+##### requirements
+- session of type employee

@@ -7,6 +7,7 @@ const misc = require('./routes/misc');
 const employee = require('./routes/employee');
 const customer = require('./routes/customer');
 const job = require('./routes/job')
+const photo = require('./routes/photo')
 const client = require('./utils/db');
 const pg = require('pg');
 const pgSession = require('connect-pg-simple')(session);
@@ -64,6 +65,7 @@ app.use('/misc', misc)
 app.use('/employee', employee)
 app.use('/customer', customer)
 app.use('/job', job)
+app.use('/photo', photo)
 
 
 const PORT = 3001;
