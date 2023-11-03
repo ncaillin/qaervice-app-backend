@@ -50,4 +50,50 @@ router.post('/create', async (req, res) =>
 
 })
 
+router.get('/', async (req, res) => 
+{
+  let query
+  let values
+  let DB_RES
+  let ownerId
+  if (!req.session.uid)
+  {
+    return res.status(400).send({'error': 'must be logged in'})
+  }
+  if (!(req.session.type === 'Employee' || req.session.type === 'Owner'))
+  {
+    return res.status(401).send({'error': 'must be logged in as Employee or Owner'})
+  }
+  
+  if (req.session.type === 'Employee')
+  {
+    query = 'SELECT * FROM public."Employee" WHERE id = $1'
+    values =  [req.session.uid]
+    DB_RES = await client.query(query, values)
+  } else
+  {
+    query = 'SELECT * FROM public."Owner" WHERE id = $1'
+    values =  [req.session.uid]
+    DB_RES = await client.query(query, values) 
+  }
+  
+  if (!DB_RES.rows[0])
+  {
+    return res.status(404).send({'error': 'employee/owner not found'})
+  }
+
+  if (req.session.type === 'Employee')
+  {
+    ownerId = DB_RES.rows[0].ownerId
+  } else
+  {
+    ownerId = DB_RES.rows[0].id
+  }
+  query = 'SELECT id, name from public."Customer" WHERE "ownerId" = $1'
+  values =  [ownerId]
+  DB_RES = await client.query(query, values) 
+  
+  return res.status(200).send({'customers': DB_RES.rows})
+})
+
 module.exports = router

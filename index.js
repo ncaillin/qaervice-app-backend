@@ -1,4 +1,5 @@
 const express = require('express');
+const morgan = require('morgan');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
@@ -8,6 +9,7 @@ const employee = require('./routes/employee');
 const customer = require('./routes/customer');
 const job = require('./routes/job')
 const photo = require('./routes/photo')
+const task = require('./routes/task')
 const client = require('./utils/db');
 const pg = require('pg');
 const pgSession = require('connect-pg-simple')(session);
@@ -28,6 +30,7 @@ const IN_PROD = NODE_ENV === 'production'
 
 
 const app = express();
+app.use(morgan('tiny'));
 
 const pool = new pg.Pool({
   host: process.env.PG_HOST,
@@ -66,6 +69,7 @@ app.use('/employee', employee)
 app.use('/customer', customer)
 app.use('/job', job)
 app.use('/photo', photo)
+app.use('/task', task)
 
 
 const PORT = 3001;

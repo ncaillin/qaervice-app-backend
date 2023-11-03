@@ -50,6 +50,40 @@ router.post('/create', async (req, res) =>
   return res.status(201).end()  
 })
 
+router.get('/id', async (req, res) => 
+{
+  console.log(req.session)
+  const {
+    type
+  } = req.session
+  if (type !== 'Employee')
+  {
+    return res.status(401).send({'error': 'must be logged in as Employee'})
+  }
+
+  let query = 'SELECT * FROM public."Employee" WHERE id = $1'
+  let values = [req.session.uid]
+  let DB_RES = await client.query(query, values)
+  const employee = DB_RES.rows[0]
+  if (!employee)
+  {
+    return res.status(404).send({'error': 'employee not found'})
+  }
+
+  query = `
+      SELECT "Job".id, "Job".name AS "jobName", "Customer".name AS "customerName"
+      FROM public."Job"
+      INNER JOIN "Customer" ON "Job"."customerId"="Customer".id
+      WHERE "Job"."employeeId" = $1 AND "Job"."inProgress" = $2`
+  values = [employee.id, true]
+  DB_RES = await client.query(query, values)
+  if (DB_RES.rowCount === 0)
+  {
+    return res.status(200).send({'jobId': 0})
+  }
+  return res.status(200).send({'jobId': DB_RES.rows[0].id, 'jobName': DB_RES.rows[0].jobName, 'customerName': DB_RES.rows[0].customerName})
+})
+
 module.exports = router
 
 

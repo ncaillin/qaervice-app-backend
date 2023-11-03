@@ -140,7 +140,7 @@ Password set    |identifierStr or password missing  |active !== false           
 &#xfeff;        |password < 7 chars                 |                           |                           |more than 1 employee found
 
 
-### OST
+### POST
 ### /v2/customer/create
 
 ##### inputs
@@ -166,6 +166,17 @@ Password set    |identifierStr or password missing  |active !== false           
 ---                     |---                |---                    |---                |---
 name or email missing   |session invalid    |error writing to DB    |customer exists    |Customer created
 email invalid           |                   |                       |                   |
+
+### GET
+### /v2/customer
+#### returns list of customers
+##### inputs
+- N / A
+##### requirements
+- session of type Owner or employee
+##### method
+- check session validity
+- return list of customers
 
 ### POST
 ### /v2/job/create
@@ -203,3 +214,36 @@ email invalid           |                   |                       |           
 - photoID
 ##### requirements
 - session of type employee
+#### method
+- check session validity
+- check employee exists
+- check id exists
+- check photo exists
+- check employee has access
+- read and return binary stream for photo
+### GET
+### /v2/job/id
+#### gets current job, returns id 0 if no active job
+##### requirements
+- session of type employee
+##### method
+- check session validity
+- check employee exists
+- return photo
+
+### POST
+### /v2/task/create
+##### inputs
+- taskname
+- jobId
+- photoId (optional)
+##### requirements
+- session of type employee
+##### method
+- check session validity 
+- check inputs
+- check job exists and is not completed
+- check employee has access to job
+- initialise new task
+
+

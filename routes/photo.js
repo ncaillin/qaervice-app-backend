@@ -10,17 +10,32 @@ const options =
   maxFiles: 1
 }
 
-const write_img_to_db = async (files, id) => {
-  if (!files.file[0])
+const waitFile = (path, timeout, callback) =>
+{
+  // wait for file to exist, then perform callback
+  const timeoutId = setTimeout(() => {
+    fs.unwatchFile(path, this)
+    console.log('timed out')
+  }, 10000)
+  return fs.watchFile(path, {interval: 50}, (event, trigger) => 
   {
-    throw new Error('must attach img')
-  }
-  const img_path = files.file[0].filepath
-  const data = fs.readFileSync(img_path)
+    if(event.size !== 0)
+    {
+      clearTimeout(timeoutId)
+      fs.unwatchFile(path, this)
+      console.log('File Exists')
+      return 12
+    }
+  })
+}
+
+const write_img_to_db = async (filepath, id) => {
+  const data = fs.readFileSync('/tmp/1bdc802af37fb0df475726900')
   console.log(data)
   let query = 'INSERT INTO public."Photo" ("employeeId", img) VALUES ($1, $2) RETURNING *'
   let values = [id, data]
   let DB_RES = await client.query(query, values)
+  console.log('DONE with DB')
   return DB_RES.rows[0]
 }
 
@@ -42,27 +57,22 @@ router.post('/new', async (req, res) =>
   {
     return res.status(400).send({'error': 'employee not found'})
   }
-
-  const form = new formidable.IncomingForm({})
-  const upload = await form.parse(req, (err, fields, files) => 
-  {
+  const form = await new formidable.IncomingForm({})
+  const test = await form.parse(req, (err, fields, files) => {
     if (err)
     {
-      res.status(500).send({'error': err})
+      return res.status(500).send({'error': err})
     }
-    try 
-    {
-      write_img_to_db(files, employee.id)
-        .then(img => 
-        {
-          return res.status(201).send({'id': img.id})
-        })
-    } catch(err)
-    {
-      res.status(500).send({'error': err})
-    }
-    return files
   })
+  const photo = test.openedFiles[0]
+  if (!photo)
+  {
+    return res.status(400).send({'error': 'must attach file'})
+  }
+  const foo = await waitFile('/tmp/123')
+  console.log('test')
+  // DB_RES = await write_img_to_db(photo.filepath, employee.id)
+  return res.status(201).end()
 })
 
 router.get('/', async (req, res) => 
