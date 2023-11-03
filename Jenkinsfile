@@ -10,7 +10,7 @@ node {
 
     stage('Build image') {
 
-        app = docker.build("qaervice/qaervice-backend")
+        app = docker.build("registry.gitlab.com/qaervice/backend")
     }
 
     stage('Test image') {
@@ -23,7 +23,7 @@ node {
     }
 
     stage('Push image') {
-        docker.withRegistry('http://cloud.canister.io:5000', 'container-auth') {
+        docker.withRegistry('https://registry.gitlab.com', 'gitlab-backend') {
             app.push("${env.BUILD_NUMBER}")
             app.push("latest")
         }
