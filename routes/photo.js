@@ -3,6 +3,8 @@ const router = express.Router()
 const client = require('../utils/db')
 const formidable = require('formidable')
 const fs = require('fs')
+const uniqueFilename = require('unique-filename')
+const mime = require('mime')
 const path = require('path')
 
 const options = 
@@ -28,13 +30,6 @@ const waitFile = (path, timeout, callback) =>
   })
 }
 
-const write_img_to_db = async (filepath, id) => {
-  const data = fs.readFileSync(filepath)
-  let query = 'INSERT INTO public."Photo" ("employeeId", img) VALUES ($1, $2) RETURNING id'
-  let values = [id, data]
-  let DB_RES = await client.query(query, values)
-  return DB_RES.rows[0]
-}
 
 router.post('/new', async (req, res) =>
 {
@@ -62,19 +57,23 @@ router.post('/new', async (req, res) =>
     }
   })
   const photo = test.openedFiles[0]
-  if (!photo)
-  {
-    return res.status(400).send({'error': 'must attach file'})
-  }
-  console.log(photo.filepath)
-  const timeout = () => 
-  {
-    return res.status(500).send({'error': 'error reading file'})
-  }
   const callback = async () => 
   {
-    const id = await write_img_to_db(photo.filepath, employee.id)
-    return res.status(201).send(id)
+    const buffer = fs.readFileSync(photo.filepath)
+    const filename = uniqueFilename('./images')
+    await fs.writeFileSync(filename, buffer)
+    query = 'INSERT INTO public."Photo" ("employeeId", filepath) VALUES ($1, $2) RETURNING id'
+    values = [employee.id, filename]
+    DB_RES = await client.query(query, values)
+    if (DB_RES.rows[0])
+    {
+      return res.status(201).send({'id': DB_RES.rows[0].id})
+    }
+  }
+  const timeout = () => 
+  {
+    console.log('Timed out')
+    return res.status(500).end()
   }
   waitFile(photo.filepath, timeout, callback)
 })
@@ -114,9 +113,12 @@ router.get('/', async (req, res) =>
   {
     return res.status(401).send({'error': 'employee not allowed access to photo'})
   }
-
-  res.set('Content-Type', 'application/octet-stream')
-  return res.status(200).send(photo.img)
+  const path = `./${photo.filepath}`
+  console.log(path)
+  const type = mime.getType(path)
+  const contents = fs.readFileSync(path, "base64")
+  const dataURL = `data:${type};base64,${contents}`
+  return res.status(200).send({'data': dataURL})
 })
 
 module.exports = router
