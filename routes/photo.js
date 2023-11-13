@@ -15,27 +15,24 @@ const waitFile = (path, timeout, callback) =>
   // wait for file to exist, then perform callback
   const timeoutId = setTimeout(() => {
     fs.unwatchFile(path, this)
-    console.log('timed out')
+    timeout()
   }, 10000)
-  return fs.watchFile(path, {interval: 50}, (event, trigger) => 
+  fs.watchFile(path, {interval: 50}, (event, trigger) => 
   {
     if(event.size !== 0)
     {
       clearTimeout(timeoutId)
       fs.unwatchFile(path, this)
-      console.log('File Exists')
-      return 12
+      callback()
     }
   })
 }
 
 const write_img_to_db = async (filepath, id) => {
-  const data = fs.readFileSync('/tmp/1bdc802af37fb0df475726900')
-  console.log(data)
-  let query = 'INSERT INTO public."Photo" ("employeeId", img) VALUES ($1, $2) RETURNING *'
+  const data = fs.readFileSync(filepath)
+  let query = 'INSERT INTO public."Photo" ("employeeId", img) VALUES ($1, $2) RETURNING id'
   let values = [id, data]
   let DB_RES = await client.query(query, values)
-  console.log('DONE with DB')
   return DB_RES.rows[0]
 }
 
@@ -69,10 +66,17 @@ router.post('/new', async (req, res) =>
   {
     return res.status(400).send({'error': 'must attach file'})
   }
-  const foo = await waitFile('/tmp/123')
-  console.log('test')
-  // DB_RES = await write_img_to_db(photo.filepath, employee.id)
-  return res.status(201).end()
+  console.log(photo.filepath)
+  const timeout = () => 
+  {
+    return res.status(500).send({'error': 'error reading file'})
+  }
+  const callback = async () => 
+  {
+    const id = await write_img_to_db(photo.filepath, employee.id)
+    return res.status(201).send(id)
+  }
+  waitFile(photo.filepath, timeout, callback)
 })
 
 router.get('/', async (req, res) => 
@@ -82,7 +86,7 @@ router.get('/', async (req, res) =>
     return res.status(401).send({'error': 'must be logged in as employee'})
   }
   
-  if (!req.body.id) 
+  if (!req.query.id) 
   {
     return res.status(400).send({'error': 'must include photo id'})
   }
@@ -99,7 +103,7 @@ router.get('/', async (req, res) =>
   }
   
   query = 'SELECT * FROM public."Photo" WHERE id = $1'
-  values = [req.body.id]
+  values = [req.query.id]
   DB_RES = await client.query(query, values)
   const photo = DB_RES.rows[0]
   if (!photo)

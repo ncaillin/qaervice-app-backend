@@ -84,6 +84,64 @@ router.get('/id', async (req, res) =>
   return res.status(200).send({'jobId': DB_RES.rows[0].id, 'jobName': DB_RES.rows[0].jobName, 'customerName': DB_RES.rows[0].customerName})
 })
 
+
+router.get('/tasks', async (req, res) => 
+{
+  let query
+  let values
+  let DB_RES
+  
+  const { type, uid } = req.session
+  const { jobId } = req.query
+  
+  if (type !== 'Employee')
+  {
+    return res.status(401).send({'error': 'must be logged in as employee'})
+  }
+  if (!jobId)
+  {
+    return res.status(400).send({'error': 'must attach jobId'})
+  }
+  
+  // make sure has access to job
+
+  query = 'SELECT * FROM public."Job" WHERE id = $1'
+  values = [jobId]
+  DB_RES = await client.query(query, values)
+  const job = DB_RES.rows[0]
+
+  if (!job)
+  {
+    return res.status(404).send({'error': 'job not found'})
+  }
+
+  
+  query = 'SELECT * FROM public."Employee" WHERE id = $1'
+  values = [uid]
+  DB_RES = await client.query(query, values)
+  const employee = DB_RES.rows[0]
+  
+  if (!employee)
+  {
+    return res.status(404).send({'error': 'employee not found'})
+  }
+  
+  if (job.employeeId !== employee.id)
+  {
+    return res.status(401).send({'error': 'employee does not have access to this job'})
+  }
+  query = 'SELECT id, name, "photoId" FROM public."Task" WHERE "jobId" = $1 ORDER BY id ASC'
+  values = [job.id]
+  DB_RES = await client.query(query, values)
+  const taskList = DB_RES.rows
+
+  if (!taskList) 
+  {
+    return res.status(400).send({'error': 'DB error'})
+  }
+  return res.status(200).send(taskList)
+})
+
 module.exports = router
 
 

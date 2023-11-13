@@ -246,4 +246,12 @@ email invalid           |                   |                       |           
 - check employee has access to job
 - initialise new task
 
+### GET
+### /v2/job/tasks
+##### inputs
+- taskId
+##### requirements
+- session of type employee
+##### return
+array of tasks in job {name, photoId (if applicable)}
 
