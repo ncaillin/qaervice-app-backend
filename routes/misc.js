@@ -56,6 +56,7 @@ miscRouter.post('/login', async (req, res) =>
     {
       req.session.uid = DB_RES.rows[0].id
       req.session.type = 'Employee'
+      console.log(req.session)
       return res.status(200).send({'type': 'Employee'})
     }
     return res.status(401).send({'error': 'invalid password'})
