@@ -1,8 +1,8 @@
-const express = require('express')
-const router = express.Router()
-const client = require('../utils/db')
+import { default as express } from 'express'
+const jobRouter = express.Router()
+import { client } from '../utils/db.js'
 
-router.post('/create', async (req, res) => 
+jobRouter.post('/create', async (req, res) => 
 {
   const 
   {
@@ -50,7 +50,7 @@ router.post('/create', async (req, res) =>
   return res.status(201).end()  
 })
 
-router.get('/id', async (req, res) => 
+jobRouter.get('/id', async (req, res) => 
 {
   console.log(req.session)
   const {
@@ -85,7 +85,7 @@ router.get('/id', async (req, res) =>
 })
 
 
-router.get('/tasks', async (req, res) => 
+jobRouter.get('/tasks', async (req, res) => 
 {
   let query
   let values
@@ -142,6 +142,6 @@ router.get('/tasks', async (req, res) =>
   return res.status(200).send(taskList)
 })
 
-module.exports = router
+export { jobRouter }
 
 

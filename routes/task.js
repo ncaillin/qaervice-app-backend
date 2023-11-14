@@ -1,9 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const client = require('../utils/db')
+import { default as express } from 'express'
+const taskRouter = express.Router()
+import { client } from '../utils/db.js'
 
 
-router.post('/create', async (req, res) => 
+taskRouter.post('/create', async (req, res) => 
 {
   let query
   let values
@@ -71,4 +71,4 @@ router.post('/create', async (req, res) =>
 })
 
 
-module.exports = router
+export { taskRouter }

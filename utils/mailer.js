@@ -1,5 +1,6 @@
-const nodemailer = require("nodemailer");
-require('dotenv').config()
+import { default as nodemailer } from 'nodemailer'
+import { default as dotenv } from 'dotenv'
+dotenv.config()
 
 const noreply = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
@@ -31,4 +32,4 @@ const sendMailNoReply = ({to, subject, html}) =>
   })
 }
 
-module.exports = { sendMailNoReply }
+export { sendMailNoReply }

@@ -1,11 +1,11 @@
-const express = require('express')
-const router = express.Router()
-const client = require('../utils/db')
-const formidable = require('formidable')
-const fs = require('fs')
-const uniqueFilename = require('unique-filename')
-const mime = require('mime')
-const path = require('path')
+import { default as express } from 'express'
+const photoRouter = express.Router()
+import { client } from '../utils/db.js'
+import { IncomingForm } from 'formidable'
+import {default as fs} from 'fs'
+import { default as uniqueFilename } from 'unique-filename'
+import { default as mime } from 'mime'
+import { default as path } from 'path'
 
 const options = 
 {
@@ -31,7 +31,7 @@ const waitFile = (path, timeout, callback) =>
 }
 
 
-router.post('/new', async (req, res) =>
+photoRouter.post('/new', async (req, res) =>
 {
   if (!(req.session && req.session.type === 'Employee'))
   {
@@ -49,7 +49,8 @@ router.post('/new', async (req, res) =>
   {
     return res.status(400).send({'error': 'employee not found'})
   }
-  const form = await new formidable.IncomingForm({})
+  console.log('OK')
+  const form = await new IncomingForm({})
   const test = await form.parse(req, (err, fields, files) => {
     if (err)
     {
@@ -57,10 +58,18 @@ router.post('/new', async (req, res) =>
     }
   })
   const photo = test.openedFiles[0]
+  console.log(photo.type)
+  if (!photo)
+  {
+    return // formidable error return inside of function so need to catch here and stop execution
+  }
   const callback = async () => 
   {
     const buffer = fs.readFileSync(photo.filepath)
+    console.log()
     const filename = uniqueFilename('./images')
+    const type = mime.getType(buffer)
+    console.log(type)
     await fs.writeFileSync(filename, buffer)
     query = 'INSERT INTO public."Photo" ("employeeId", filepath) VALUES ($1, $2) RETURNING id'
     values = [employee.id, filename]
@@ -78,7 +87,7 @@ router.post('/new', async (req, res) =>
   waitFile(photo.filepath, timeout, callback)
 })
 
-router.get('/', async (req, res) => 
+photoRouter.get('/', async (req, res) => 
 {
   if (!(req.session && req.session.type === 'Employee'))
   {
@@ -114,11 +123,10 @@ router.get('/', async (req, res) =>
     return res.status(401).send({'error': 'employee not allowed access to photo'})
   }
   const path = `./${photo.filepath}`
-  console.log(path)
   const type = mime.getType(path)
   const contents = fs.readFileSync(path, "base64")
   const dataURL = `data:${type};base64,${contents}`
   return res.status(200).send({'data': dataURL})
 })
 
-module.exports = router
+export { photoRouter }

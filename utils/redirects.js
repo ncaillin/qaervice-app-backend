@@ -10,4 +10,5 @@ const redirectOwner = (req, res, next) => {
   next()
 }
 
-module.exports = { redirectOwner }
+
+export { redirectOwner }

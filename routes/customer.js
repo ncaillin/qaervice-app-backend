@@ -1,10 +1,10 @@
-const express = require('express')
-const router = express.Router()
-const client = require('../utils/db')
+import { default as express } from 'express' 
+const customerRouter = express.Router()
+import { client } from '../utils/db.js'
 
 const EMAIL_REG_EXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-router.post('/create', async (req, res) => 
+customerRouter.post('/create', async (req, res) => 
 {
   let
   {
@@ -50,7 +50,7 @@ router.post('/create', async (req, res) =>
 
 })
 
-router.get('/', async (req, res) => 
+customerRouter.get('/', async (req, res) => 
 {
   let query
   let values
@@ -96,4 +96,4 @@ router.get('/', async (req, res) =>
   return res.status(200).send({'customers': DB_RES.rows})
 })
 
-module.exports = router
+export { customerRouter }

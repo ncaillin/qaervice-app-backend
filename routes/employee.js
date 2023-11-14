@@ -1,14 +1,14 @@
-const express = require('express')
-const router = express.Router()
-const redirect = require('../utils/redirects')
-const client = require('../utils/db')
-const mailer = require('../utils/mailer')
-const crypto = require('crypto')
-const bcrypt = require('bcrypt')
+import { default as express } from 'express'
+const employeeRouter = express.Router()
+import { redirectOwner } from '../utils/redirects.js'
+import { client } from '../utils/db.js'
+import { sendMailNoReply } from '../utils/mailer.js'
+import { default as crypto } from 'crypto'
+import { default as bcrypt } from 'bcrypt'
 
 const EMAIL_REG_EXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-router.post('/create', redirect.redirectOwner, async (req, res) => 
+employeeRouter.post('/create', redirectOwner, async (req, res) => 
 {
   let
   {
@@ -59,7 +59,7 @@ router.post('/create', redirect.redirectOwner, async (req, res) =>
     return res.status(500).end()
   }
 
-  await mailer.sendMailNoReply(
+  await sendMailNoReply(
   {
     to: email,
     subject: 'Your manager has signed you up!',
@@ -83,7 +83,7 @@ router.post('/create', redirect.redirectOwner, async (req, res) =>
   res.status(201).end()
 })
 
-router.put('/setPassword', async (req, res) => 
+employeeRouter.put('/setPassword', async (req, res) => 
 {
   const
   {
@@ -130,5 +130,5 @@ router.put('/setPassword', async (req, res) =>
   return res.status(200).end()
 })
 
-module.exports = router
+export { employeeRouter }
 

@@ -1,5 +1,6 @@
-const pg = require('pg');
-require('dotenv').config();
+import { default as pg } from 'pg'
+import { default as dotenv } from 'dotenv'
+dotenv.config()
 
 const client = new pg.Client({
   user: process.env.PG_USER,
@@ -10,4 +11,4 @@ const client = new pg.Client({
 });
 
 
-module.exports = client
+export { client }

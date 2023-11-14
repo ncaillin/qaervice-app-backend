@@ -1,9 +1,10 @@
-const express = require('express')
-const client = require('../utils/db')
-const router = express.Router()
-const stripe = require('../utils/stripe')
-const bcrypt = require('bcrypt')
-require('dotenv').config()
+import { default as express } from 'express'
+import { client } from '../utils/db.js'
+const ownerRouter = express.Router()
+import { newCustomer, addOneSubscription } from '../utils/stripe.js'
+import { default as bcrypt } from 'bcrypt'
+import { default as dotenv } from 'dotenv'
+dotenv.config()
 
 const 
 {
@@ -12,7 +13,7 @@ const
 } = process.env
 
 
-router.post('/register', async (req, res) => // TODO: HOME REDIRECT 
+ownerRouter.post('/register', async (req, res) => // TODO: HOME REDIRECT 
 {
 
   const EMAIL_REG_EXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -62,14 +63,14 @@ router.post('/register', async (req, res) => // TODO: HOME REDIRECT
     return res.status(409).send({'error': 'User exists as employee'})
   }
 
-  var STRIPE_RES = await stripe.newCustomer(
+  var STRIPE_RES = await newCustomer(
   {
     email,
     name
   })
   const stripeId = STRIPE_RES.id
 
-  STRIPE_RES = await stripe.addOneSubscription(
+  STRIPE_RES = await addOneSubscription(
     {
       customer: stripeId,
       subscription: FREE_PRICE
@@ -92,4 +93,4 @@ router.post('/register', async (req, res) => // TODO: HOME REDIRECT
 })
 
 
-module.exports = router
+export { ownerRouter }

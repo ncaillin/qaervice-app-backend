@@ -1,4 +1,4 @@
-const queryString = require('querystring')
+import { default as queryString } from 'querystring'
 
 const 
 {
@@ -41,4 +41,4 @@ const addOneSubscription = async ( params ) =>
 }
 
 
-module.exports = { newCustomer, addOneSubscription }
+export { newCustomer, addOneSubscription }

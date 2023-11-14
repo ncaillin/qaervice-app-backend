@@ -1,9 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const bcrypt = require('bcrypt')
-const client = require('../utils/db')
+import { default as express } from 'express'
+const miscRouter = express.Router()
+import { default as bcrypt } from  'bcrypt'
+import { client } from '../utils/db.js'
 
-router.post('/login', async (req, res) => 
+miscRouter.post('/login', async (req, res) => 
 {
 
   let  
@@ -65,4 +65,4 @@ router.post('/login', async (req, res) =>
   res.status(404).send({'error': 'no user found'})
 })
 
-module.exports = router
+export { miscRouter }

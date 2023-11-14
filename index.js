@@ -1,19 +1,21 @@
-const express = require('express');
-const morgan = require('morgan');
-const session = require('express-session');
-const bcrypt = require('bcrypt');
-const cors = require('cors');
-const owner = require('./routes/owner');
-const misc = require('./routes/misc');
-const employee = require('./routes/employee');
-const customer = require('./routes/customer');
-const job = require('./routes/job')
-const photo = require('./routes/photo')
-const task = require('./routes/task')
-const client = require('./utils/db');
-const pg = require('pg');
-const pgSession = require('connect-pg-simple')(session);
-require('dotenv').config();
+import { default as express } from 'express'
+import { default as morgan } from 'morgan'
+import { default as session } from 'express-session'
+import { default as bcrypt } from 'bcrypt'
+import { default as cors } from 'cors'
+import { default as pg } from 'pg'
+import { default as PgSession } from 'connect-pg-simple'
+const pgSession = PgSession(session)
+import { ownerRouter } from './routes/owner.js'
+import { miscRouter } from './routes/misc.js'
+import { employeeRouter } from './routes/employee.js'
+import { customerRouter } from './routes/customer.js'
+import { jobRouter } from './routes/job.js'
+import { photoRouter } from './routes/photo.js'
+import { taskRouter } from './routes/task.js'
+import { client } from './utils/db.js'
+import { default as dotenv } from 'dotenv'
+dotenv.config()
 
 const TWO_HOURS = 1000 * 60 * 60 * 2
 
@@ -63,13 +65,13 @@ app.use(session({
 }))
 app.use(express.json());
 
-app.use('/owner', owner)
-app.use('/misc', misc)
-app.use('/employee', employee)
-app.use('/customer', customer)
-app.use('/job', job)
-app.use('/photo', photo)
-app.use('/task', task)
+app.use('/owner', ownerRouter)
+app.use('/misc', miscRouter)
+app.use('/employee', employeeRouter)
+app.use('/customer', customerRouter)
+app.use('/job', jobRouter)
+app.use('/photo', photoRouter)
+app.use('/task', taskRouter)
 
 
 const PORT = 3001;
