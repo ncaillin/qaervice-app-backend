@@ -50,9 +50,58 @@ jobRouter.post('/create', async (req, res) =>
   return res.status(201).end()  
 })
 
+jobRouter.put('/finish', async (req, res) => 
+{
+  let query
+  let values
+  let DB_RES
+  const {
+    type
+  } = req.session
+  const {
+    id
+  } = req.body
+  if (type !== 'Employee')
+  {
+    return res.status(401).send({'error': 'must be logged in as Employee'})
+  }
+  if (!id)
+  {
+    return res.status(400).send({'error': 'must attach id of job'})
+  }
+  query = 'SELECT * FROM public."Employee" WHERE id = $1'
+  values = [req.session.uid]
+  DB_RES = await client.query(query, values)
+  const employee = DB_RES.rows[0]
+  if (!employee)
+  {
+    return res.status(404).send({'error': 'employee not found'})
+  }
+  query = 'SELECT * from public."Job" WHERE id = $1'
+  values = [id]
+  console.log(values)
+  DB_RES = await client.query(query, values)
+  const job = DB_RES.rows[0]
+  if (!job)
+  {
+    return res.status(404).send({'error': 'job not found'})
+  }
+  if (employee.id !== job.employeeId)
+  {
+    return res.status(401).send({'error': 'employee not authorised to edit this job'})
+  }
+  query = 'UPDATE public."Job" SET "inProgress" = $1 WHERE id = $2 RETURNING *'
+  values = [false, job.id]
+  DB_RES = await client.query(query, values)
+  if (!DB_RES.rows[0])
+  {
+    return res.status(500).send({'error': 'error updating DB'})
+  }
+  return res.status(200).end()
+})
+
 jobRouter.get('/id', async (req, res) => 
 {
-  console.log(req.session)
   const {
     type
   } = req.session

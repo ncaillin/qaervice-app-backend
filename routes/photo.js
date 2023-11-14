@@ -6,6 +6,7 @@ import {default as fs} from 'fs'
 import { default as uniqueFilename } from 'unique-filename'
 import { default as mime } from 'mime'
 import { default as path } from 'path'
+import { fileTypeFromBuffer, fileTypeFromStream } from 'file-type'
 
 const options = 
 {
@@ -49,7 +50,6 @@ photoRouter.post('/new', async (req, res) =>
   {
     return res.status(400).send({'error': 'employee not found'})
   }
-  console.log('OK')
   const form = await new IncomingForm({})
   const test = await form.parse(req, (err, fields, files) => {
     if (err)
@@ -58,7 +58,6 @@ photoRouter.post('/new', async (req, res) =>
     }
   })
   const photo = test.openedFiles[0]
-  console.log(photo.type)
   if (!photo)
   {
     return // formidable error return inside of function so need to catch here and stop execution
@@ -66,10 +65,12 @@ photoRouter.post('/new', async (req, res) =>
   const callback = async () => 
   {
     const buffer = fs.readFileSync(photo.filepath)
-    console.log()
+    const type = await fileTypeFromBuffer(buffer)
+    if (!type || !type.mime.startsWith('image'))
+    {
+      return res.status(400).send({'error': 'upload must be an image'})
+    }
     const filename = uniqueFilename('./images')
-    const type = mime.getType(buffer)
-    console.log(type)
     await fs.writeFileSync(filename, buffer)
     query = 'INSERT INTO public."Photo" ("employeeId", filepath) VALUES ($1, $2) RETURNING id'
     values = [employee.id, filename]
@@ -123,9 +124,14 @@ photoRouter.get('/', async (req, res) =>
     return res.status(401).send({'error': 'employee not allowed access to photo'})
   }
   const path = `./${photo.filepath}`
-  const type = mime.getType(path)
   const contents = fs.readFileSync(path, "base64")
-  const dataURL = `data:${type};base64,${contents}`
+  const stream = fs.createReadStream(path)
+  const type = await fileTypeFromStream(stream)
+  if (!type || !type.mime.startsWith('image'))
+  {
+    return res.status(500).send({'error': 'not an image'})
+  }
+  const dataURL = `data:${type.mime};base64,${contents}`
   return res.status(200).send({'data': dataURL})
 })
 
