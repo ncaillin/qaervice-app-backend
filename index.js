@@ -25,6 +25,7 @@ const {
   SESS_NAME = 'sid',
   SESS_SECRET = '123456',
   SAME_SITE = true,
+  PROXY = true,
   SESS_TABLE_NAME = 'devSessions',
   CORS_ORIGIN = 'http://localhost:3000'
 } = process.env
@@ -57,6 +58,7 @@ app.use(session({
   }),
   resave: false,
   secret: SESS_SECRET,
+  proxy: PROXY,
   saveUninitialized: false,
   cookie: {
     maxAge: SESS_LIFETIME,
