@@ -26,6 +26,7 @@ const {
   SESS_SECRET = '123456',
   SAME_SITE = true,
   PROXY = true,
+  TRUST_PROXY = 1,
   SESS_TABLE_NAME = 'devSessions',
   CORS_ORIGIN = 'http://localhost:3000'
 } = process.env
@@ -49,6 +50,7 @@ console.log(CORS_ORIGIN)
 
 
 app.use(cors({origin: CORS_ORIGIN, credentials: true}));
+app.set('trust proxy', TRUST_PROXY)
 app.use(session({
   name: SESS_NAME,
   store: new pgSession({
