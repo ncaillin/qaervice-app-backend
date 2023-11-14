@@ -43,7 +43,7 @@ const pool = new pg.Pool({
   connectionTimeoutMillis: 2000,
 })
 
-
+console.log(CORS_ORIGIN)
 
 
 app.use(cors({origin: CORS_ORIGIN, credentials: true}));
