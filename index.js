@@ -24,6 +24,7 @@ const {
   NODE_ENV = 'development',
   SESS_NAME = 'sid',
   SESS_SECRET = '123456',
+  SAME_SITE = true,
   SESS_TABLE_NAME = 'devSessions',
   CORS_ORIGIN = 'http://localhost:3000'
 } = process.env
@@ -59,7 +60,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     maxAge: SESS_LIFETIME,
-    sameSite: true,
+    sameSite: SAME_SITE,
     secure: IN_PROD
   }
 }))
