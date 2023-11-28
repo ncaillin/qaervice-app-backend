@@ -66,4 +66,17 @@ miscRouter.post('/login', async (req, res) =>
   res.status(404).send({'error': 'no user found'})
 })
 
+miscRouter.get('/whoami', async (req, res) => {
+  const {
+    type
+  } = req.session
+
+  if (!type)
+  {
+    return res.status(401).end()
+  }
+
+  res.status(200).send({'type': type})
+})
+
 export { miscRouter }

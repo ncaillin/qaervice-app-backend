@@ -128,7 +128,7 @@ jobRouter.get('/id', async (req, res) =>
   DB_RES = await client.query(query, values)
   if (DB_RES.rowCount === 0)
   {
-    return res.status(200).send({'jobId': 0})
+    return res.status(200).send({'jobId': 0, 'name': employee.name})
   }
   return res.status(200).send({'jobId': DB_RES.rows[0].id, 'jobName': DB_RES.rows[0].jobName, 'customerName': DB_RES.rows[0].customerName})
 })
